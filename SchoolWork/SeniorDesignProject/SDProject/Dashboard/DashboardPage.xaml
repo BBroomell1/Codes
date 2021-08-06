@@ -1,0 +1,627 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Dashboard" xmlns:sdk1="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+      xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit" 
+      xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="Dashboard.DashboardPage"
+      
+      mc:Ignorable="d"
+      Title="DashboardPage"
+      >
+
+
+    <Page.Resources>
+
+
+        <BooleanToVisibilityConverter x:Key="boolToVis"/>
+        <!-- <local:Stats x:Key="MyStats"/> -->
+        <local:NameToBrushConverter x:Key="MyConverter"/>
+
+        <!-- Adding style to datagrid -->
+        <Style x:Key="DataGridStyle1" TargetType="{x:Type DataGrid}">
+            <Setter Property="ColumnHeaderStyle" Value="{DynamicResource ColumnHeaderStyle1}"/>
+            <Setter Property="CellStyle" Value="{DynamicResource CellStyle1}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="Transparent"/>
+
+        </Style>
+        <!-- DataGridColumnHeader style -->
+        <Style x:Key="ColumnHeaderStyle1" TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="Height" Value="75"/>
+            <Setter Property="Background" Value="#F5F6FA"/>
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontFamily" Value="Poppins" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+
+
+                        <StackPanel>
+                            <!--Changed from <contentpresenter> as content is going first, successfully fixed overlapping textbox on first row-->
+                            <TextBlock Text="{Binding}"/>
+                            <TextBox x:Name="tbTest"  Text="Type to filter" Style="{StaticResource searchBoxStyle}"                                    
+                                     Width="150" Height="27" HorizontalAlignment="Stretch" Margin="1" KeyDown="tbTest_TextChanged" 
+                                     Loaded="tbTest_Loaded" GotFocus="TextBox_GotFocus">
+
+
+                                <TextBox.ToolTip>
+                                    <TextBlock>Search by typing in value and hitting enter</TextBlock>
+                                </TextBox.ToolTip>
+                            </TextBox>
+
+
+
+                            <!--Allows you to change size of column
+                                <Thumb x:Name="PART_RightHeaderGripper" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Width="2" BorderThickness="0.6"
+								   BorderBrush="{Binding VerticalGridLinesBrush, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" Cursor="SizeWE"/>
+                            -->
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="ToolTip" Value="Click to sort column"/>
+                </Trigger>
+
+
+            </Style.Triggers>
+
+        </Style>
+
+        <Style x:Key="CellStyle1" TargetType="{x:Type DataGridCell}" 
+               BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <!--Moved location of below line so that datagrid style wasn't overwritten-->
+            <EventSetter Event="MouseDoubleClick" Handler="DataGridCell_DoubleClick"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource MyConverter}">
+                        <Binding Path="Content.Text" RelativeSource="{RelativeSource Self}" />
+                        <Binding Path="Column.Header" RelativeSource="{RelativeSource Self}" />
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <!--Changing color when cell is selected-->
+                    <Setter Property="Foreground" Value="SeaGreen"/>
+                    <Setter Property="Background" Value="#F5F6FA"/>
+                    <!--No border around cell when it is selected-->
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+                </Trigger>
+                <!--Style whatever the mouse is hovering over-->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="SeaGreen"/>
+                    <Setter Property="Background" Value="#F5F6FA"/>
+                    <!--No border around cell -->
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                </Trigger>
+            </Style.Triggers>
+
+        </Style>
+
+        <!--Cell Style for Cells in ID Column, def in 'mydatagrid_AutoGeneratingColumn'-->
+        <Style x:Key="CellStyle2" TargetType="{x:Type DataGridCell}"
+               BasedOn="{StaticResource CellStyle1}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Button Style="{StaticResource buttonStyle3}">
+                            <ContentPresenter/>
+                        </Button>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <!--Changing color when cell is selected-->
+                    <Setter Property="Foreground" Value="#9266EB"/>
+                    <Setter Property="Background" Value="#F5F6FA"/>
+                    <!--No border around cell when it is selected-->
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                </Trigger>
+                <!--Style whatever the mouse is hovering over-->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#9266EB"/>
+                    <Setter Property="Background" Value="#F5F6FA"/>
+                    <!--No border around cell -->
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <!--<Setter Property="ToolTip" Value="Double click to generate all entries with this ID in new sheet"/>-->
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <!--ListBox Content Style-->
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FontFamily" Value="Poppins"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="2"/>
+            <Style.Triggers>
+                <!--When mouse hovers over text, change color-->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="SeaGreen"/>
+                    <Setter Property="Background" Value="#F5F6FA"/>
+                    <!--No border around cell -->
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+    </Page.Resources>
+
+
+
+    <Grid Background="#F4F7FC" >
+        <!--Page is split into sections as defined here-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0*" />
+            <ColumnDefinition Width="222*"/>
+            <ColumnDefinition Width="383*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="450"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+
+        <Rectangle Grid.ColumnSpan="3" Fill="White" HorizontalAlignment="Stretch" Height="50" Stroke="Transparent" VerticalAlignment="Top" />
+
+
+
+        <Label Content="Start" Grid.Column="1" HorizontalAlignment="Right" Margin="0,10,326,10" Style="{StaticResource labelStyle}"/>
+
+        <DatePicker x:Name="EndDate" Grid.Column="1" HorizontalAlignment="Right" Height="30" Margin="0,10,10,0" VerticalAlignment="Top" SelectedDateChanged="dp_SelectedDateChanged" Style="{StaticResource datePicker}" Width="131"/>
+
+        <Label Content="End" Grid.Column="1" HorizontalAlignment="Right" Margin="0,10,146,8"  Style="{StaticResource labelStyle}" RenderTransformOrigin="-5.977,-3.969"/>
+
+        <DatePicker x:Name="StartDate" Grid.Column="1" HorizontalAlignment="Right" Height="30" Margin="0,10,189,0" VerticalAlignment="Top" SelectedDateChanged="dp_SelectedDateChanged" Style="{StaticResource datePicker}" Width="132"/>
+
+
+
+        <!--Datagrid (e.g., spreadsheet / table), given name "mydatagrid", we set the ItemSource in the DashboardPage.xaml.cs file-->
+        <DataGrid Grid.Row="1" Grid.Column="2" x:Name="mydatagrid" Margin="10"
+                    AutoGenerateColumns="True" Grid.RowSpan="2" Style="{DynamicResource DataGridStyle1}" GridLinesVisibility="None"
+                    FontFamily="{StaticResource Poppins}" SelectionUnit="Cell" IsReadOnly="True"
+                    AutoGeneratingColumn="mydatagrid_AutoGeneratingColumn" 
+                    LoadingRow="mydatagrid_LoadingRow">
+
+            <DataGrid.ContextMenu>
+                <!--Allows the user to right-click the table headers and copy the text there-->
+                <ContextMenu>
+                    <MenuItem Command="Copy"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+
+            <!-- 
+            Note: Moved location of below code, now located inside gridstyle code
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <EventSetter Event="MouseDoubleClick" Handler="DataGridCell_DoubleClick"/>
+                </Style>
+            </DataGrid.Resources>-->
+
+
+        </DataGrid>
+
+        <!--Located on bottom-left portion of screen-->
+        <TabControl Grid.Row="2" BorderBrush="Transparent" Grid.ColumnSpan="2">
+            <!--first tab starts here-->
+            <TabItem Background="White" >
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource titleStyle}"><Run Text="Full Data Breakdown"/></TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <!--1st tab content starts here-->
+                <DockPanel LastChildFill="True">
+
+                    <ListBox  HorizontalAlignment="Stretch" Margin="10,10,3,0" VerticalAlignment="Top" x:Name="listAllStats" SelectionChanged="ListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="97"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" Margin="5" Grid.Row="0" Grid.Column="0" Text="{Binding Type}" />
+                                    <TextBlock HorizontalAlignment="Stretch" Margin="5" Grid.Row="0" Grid.Column="1" Text="{Binding Content}" Foreground="#9266EB"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <!--Goal of this was to make items non-clickable, previously had set default as non-clickable (top of .xaml file)-->
+                                <Setter Property="Focusable" Value="True"/>
+                                <!--remainder is all styling (overrided)-->
+                                <Setter Property="FontFamily" Value="Poppins"/>
+                                <Setter Property="FontWeight" Value="Regular"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Padding" Value="10"/>
+                                <Setter Property="Margin" Value="2"/>
+                                <Style.Triggers>
+                                    <!--When mouse hovers over text, change color-->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="SeaGreen"/>
+                                        <Setter Property="Background" Value="#F5F6FA"/>
+                                        <!--No border around cell -->
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                </DockPanel>
+            </TabItem>
+
+            <!--Second tab starts here-->
+            <TabItem Background="White" >
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource titleStyle}"><Run Text="Pathway Breakdown"/></TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <!--Second tab content starts here-->
+                <DockPanel LastChildFill="True">
+
+                    <ListBox  HorizontalAlignment="Stretch" Margin="10,10,3,0" VerticalAlignment="Top" x:Name="listAllStats2" SelectionChanged="ListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" MinWidth="97"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" Margin="5" Grid.Row="0" Grid.Column="0" Text="{Binding Type}" />
+                                    <TextBlock HorizontalAlignment="Stretch" Margin="5" Grid.Row="0" Grid.Column="1" Text="{Binding Content}" Foreground="#9266EB"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <!--Goal of this was to make items non-clickable, previously had set default as non-clickable (top of .xaml file)-->
+                                <Setter Property="Focusable" Value="True"/>
+                                <!--remainder is all styling (overrided)-->
+                                <Setter Property="FontFamily" Value="Poppins"/>
+                                <Setter Property="FontWeight" Value="Regular"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Padding" Value="10"/>
+                                <Setter Property="Margin" Value="2"/>
+                                <Style.Triggers>
+                                    <!--When mouse hovers over text, change color-->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="SeaGreen"/>
+                                        <Setter Property="Background" Value="#F5F6FA"/>
+                                        <!--No border around cell -->
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                </DockPanel>
+            </TabItem>
+
+            <!--Third tab starts here-->
+            <TabItem Background="White">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource titleStyle}"><Run Text="Charts"/></TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <!--Third tab content here-->
+                <DVC:Chart Canvas.Top="80" Canvas.Left="10" x:Name="mcChart" Width="Auto" Height="Auto" Background="White" Grid.Row="3" Grid.Column="3">
+                    <DVC:ColumnSeries Title="Pass Rate"
+                            IndependentValueBinding="{Binding Key}" 
+                            DependentValueBinding="{Binding Value}">
+                        <DVC:ColumnSeries.DataPointStyle>
+                            <Style TargetType="{x:Type DVC:ColumnDataPoint}">
+                                <Setter Property="Background" Value="SeaGreen"/>
+                            </Style>
+                        </DVC:ColumnSeries.DataPointStyle>
+                    </DVC:ColumnSeries>
+                </DVC:Chart>
+            </TabItem>
+
+
+        </TabControl>
+
+        <!--Below: corresponds to the "Pathway" feature on upper-left portion of screen-->
+        <Grid Margin="0,0,0,10" Grid.ColumnSpan="2" Grid.RowSpan="2">
+            <Grid Height="50" Margin="0,50,0,390">
+                <Button Visibility="Visible" x:Name="openButton" Click="openEditor" Height="30"  HorizontalContentAlignment="Stretch" Style="{StaticResource ResourceKey=pathButton}" Canvas.Top="10" Canvas.Left="-8" Margin="0,10,4,10">
+                    <Grid>
+                        <TextBlock Text="   Open Pathway Builder" TextAlignment="Left" />
+                        <TextBlock Text=" ↴ " TextAlignment="Right" />
+                    </Grid>
+                </Button>
+                <Grid Height="50" Margin="0,50,0,-50">
+                    <!--TODO: visible-->
+                    <Button Visibility="Visible" x:Name="showHideColumns" Click="openHideColumns" Height="30"  HorizontalContentAlignment="Stretch" Style="{StaticResource ResourceKey=pathButton}" Canvas.Top="10" Canvas.Left="-8" Margin="0,10,4,10">
+                        <Grid>
+                            <TextBlock Text="   Show/Hide Columns" TextAlignment="Left" />
+                            <TextBlock Text=" ↴ " TextAlignment="Right" />
+                        </Grid>
+                    </Button>
+                </Grid>
+            </Grid>
+            <Grid x:Name="showSteps" Margin="0,57,4,301" Visibility="Collapsed" Background="White">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="238*"/>
+                    <ColumnDefinition Width="167*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Step 1: select course(s)" Grid.ColumnSpan="2" Visibility="Visible" x:Name="step1"  FontSize="18" FontWeight="Regular" Foreground="#9266EB" Margin="10,0,14,0"/>
+                <TextBlock Text="Step 2: select item #1 in pathway and click add" Grid.ColumnSpan="2" Visibility="Hidden" x:Name="step2" FontSize="18" FontWeight="Regular" Foreground="#9266EB" Margin="10,0,14,0"/>
+                <Grid Grid.ColumnSpan="2" Margin="0,23,0,-14">
+                    <Border HorizontalAlignment="Stretch" Margin="0,10,0,0"  >
+                        <ListBox Visibility="Visible" SelectionMode="Multiple" x:Name="listofSteps" FontFamily="Poppins" FontSize="15" Margin="0,-4,-0.333,-26.333">
+                            <!--Instead of highlighting when selected, have a checkbox-->
+                            <ListBox.Resources>
+                                <Style TargetType="{x:Type ListBoxItem}">
+                                    <!--Overriding default style, to allow us to add a checkbox to the listbox item-->
+                                    <Setter Property="OverridesDefaultStyle" Value="true" />
+                                    <Setter Property="SnapsToDevicePixels" Value="true" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <!--Adding checkbox before loading content using <contentPresenter>-->
+                                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                <CheckBox Margin="5"
+                                                                    IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                                    Checked="HandleCheck" Unchecked="HandleUnchecked">
+                                                    <ContentPresenter>
+                                                        <ContentPresenter.Resources>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <!--Change color of text on hover-->
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Foreground" Value="SeaGreen"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ContentPresenter.Resources>
+                                                    </ContentPresenter>
+                                                </CheckBox>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.Resources>
+                            <!--Setting up template per listbox item, one row, one col-->
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" MinWidth="97"/>
+                                        </Grid.ColumnDefinitions>
+                                        <!--Content we're displaying:-->
+                                        <TextBlock Text="{Binding Content}" HorizontalAlignment="Stretch" Margin="5" Grid.Row="0" Grid.Column="0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                    <ListBox Visibility="Hidden" SelectionMode="Single" x:Name="listofSteps2" FontFamily="Poppins" FontSize="15" Margin="0,5,-0.333,-26">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <!--Goal of this was to make items clickable, previously had set default as non-clickable (top of .xaml file)-->
+                                <Setter Property="Focusable" Value="True"/>
+                                <!--remainder is all styling (overrided)-->
+                                <Setter Property="FontFamily" Value="Poppins"/>
+                                <Setter Property="FontWeight" Value="Regular"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Padding" Value="10"/>
+                                <Setter Property="Margin" Value="2"/>
+                                <Style.Triggers>
+                                    <!--When mouse hovers over text, change color-->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="SeaGreen"/>
+                                        <Setter Property="Background" Value="#F5F6FA"/>
+                                        <!--No border around cell -->
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="0" Text="Course" Foreground="#9266EB"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Text="{Binding Path=Course}" Grid.Column="1" Foreground="#9266EB"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="2" Text="ClassNo" Foreground="SeaGreen"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Text="{Binding Path=Iteration}" Grid.Column="3" Foreground="SeaGreen"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+
+                    </ListBox>
+                    <!--In order to keep formatting 1_200, 2_201, etc. on DataGrid, need to maintain list in that format-->
+                    <!--Having difficulty accessing data in second column of items in listofsteps2 listbox, so cannot manually convert format-->
+                    <ListBox Visibility="Hidden" SelectionMode="Single" x:Name="hiddenlist" FontFamily="Poppins" FontSize="15" Margin="0,5,-0.333,-26"/>
+
+                </Grid>
+
+                <Button Margin="0,176,0,-74" Content="Next" Height="30"
+                                Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light"
+                                       Click="OnClick_Next" x:Name="nextButton" HorizontalAlignment="Right" Width="136" Grid.Column="1"/>
+                <Button Margin="0,176,0,-74" Content="Add" Height="30" Visibility="Hidden"
+                                Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light" 
+                                       Click="OnClick_Next2" x:Name="nextButton2" HorizontalAlignment="Right" Width="136" Grid.Column="1"/>
+                <Button Margin="4,176,0,-74" Content="Undo Last Add" HorizontalAlignment="Left" Width="146" Height="30"
+                                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light" 
+                                    Click="OnClick_Back" x:Name="backButton" Visibility="Hidden"/>
+                <Button Margin="0,176,0,-74" Content="Exit Pathway Builder" Height="30" FontSize="14"
+                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light"
+                    Click="cancel_Click" x:Name="ClosePathwayBuilder" HorizontalAlignment="Left" Width="146"/>
+
+            </Grid>
+            <Grid Margin="0,139,-0.333,45">
+                <ListBox x:Name="showHideListBox" HorizontalContentAlignment="Stretch" VerticalAlignment="Top" Visibility="Hidden"  Margin="0,-4,5,0" />
+            </Grid>
+
+            <Grid Height="124" x:Name="endResultList" Visibility="Collapsed" Margin="0,376,4,-10">
+                <!--Defining grid to have two cols here-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="193*"/>
+                    <ColumnDefinition Width="141*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Margin="0,-99,0,162" Grid.ColumnSpan="2" Background="White">
+                    <TextBlock Margin="10,0,15,31" HorizontalAlignment="Stretch"  FontFamily="Poppins" FontSize="18" Text="Current Pathway" Foreground="SeaGreen" Height="30" />
+                </Grid>
+                <!--Outer Grid is necessary in order to have both listboxes scroll together-->
+                <Grid Style="{StaticResource pipelineContainer}" Grid.ColumnSpan="2" Margin="0,-72,-0.333,45">
+                    <!--Number listbox, counts 1, 2, 3... -->
+
+                    <!--Using two separate listboxes because list will need to be re-numbered as items are removed and added by the user-->
+
+                    <!-- When previously using one listbox, there were issues with numbering when items in the middle of the list were removed -->
+                    <ListBox Margin="0,0,297,0" VerticalAlignment="Top" x:Name="indexPipeline" 
+                                         ScrollViewer.ScrollChanged="results_ScrollChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="25" />
+                                        <ColumnDefinition Width="25"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="0" Text="#" />
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="1" Text="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Focusable" Value="False"/>
+                                <!--remainder is all styling (overrided)-->
+                                <Setter Property="FontFamily" Value="Poppins"/>
+                                <Setter Property="FontWeight" Value="Regular"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Padding" Value="10"/>
+                                <Setter Property="Margin" Value="2"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <!--No border around cell -->
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                    <ListBox Margin="63,0,0,0" VerticalAlignment="Top" x:Name="createPipeline2" 
+                                         ScrollViewer.ScrollChanged="results_ScrollChanged" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="0" Text="Course" Foreground="#9266EB"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Text="{Binding Path=Course}" Grid.Column="1" Foreground="#9266EB"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Grid.Column="2" Text="ClassNo" Foreground="SeaGreen"/>
+                                    <TextBlock HorizontalAlignment="Stretch" Text="{Binding Path=Iteration}" Grid.Column="3" Foreground="SeaGreen"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <!--Hidden always, loads information from 'hiddenlist' listbox, after items in listofsteps2 (visible) are selected and added to createPipeline2 (visible)-->
+                    <ListBox Margin="43,0,0,0" VerticalAlignment="Top" x:Name="createPipeline" Visibility="Collapsed"/>
+                </Grid>
+                <Button Content="Apply Pathway" HorizontalAlignment="Right" Grid.Column="1" VerticalAlignment="Bottom" Width="136"  Height="30"
+                        Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light" Margin="0,0,0,10" Click="executePipeline_Click"/>
+                <Button Content="Close Pathway Builder" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="146"  Height="30" FontSize="14"
+                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light" Margin="4,0,0,10" Click="cancel_Click" Grid.ColumnSpan="2"/>
+
+            </Grid>
+
+            <Button x:Name="hideButton" Content="Apply" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Height="30" Margin="0,450,3.667,0" Visibility="Collapsed" Click="Hide_Click" FontSize="14"
+                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light"/>
+            <Button x:Name="UnCheckAllButton" Content="Uncheck All" HorizontalAlignment="Right" VerticalAlignment="Top" Width="86" Height="30"  Margin="0,450,83.667,0"  Click="UnCheckAllButton_Click" Visibility="Collapsed" FontSize="14"
+                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light"/>
+            <Button x:Name="CloseHideColumns" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Height="30"  Margin="0,450,174.667,0"  Click="CloseHideColumns_Click" Visibility="Collapsed" FontSize="14"
+                    Style="{StaticResource buttonStyle}" Background="White" FontFamily="Poppins" FontWeight="Light" RenderTransformOrigin="0.493,-0.122"/>
+
+
+
+
+        </Grid>
+
+        <!--Button opens up a pop-up window for importing new files-->
+        <Button Name="SaveButton" Content="Save" Grid.Column="2" VerticalAlignment="Top" Margin="0,10,116,0" Height="30"
+            Style="{StaticResource buttonStyle}" HorizontalAlignment="Right" Width="74" Click="SaveButton_Click" />
+        <Button x:Name="SaveView" Content="Save View" Grid.Column="2" VerticalAlignment="Top" Margin="0,10,10,0" Height="30"
+            Style="{StaticResource buttonStyle}" HorizontalAlignment="Right" Width="101" Click="SaveView_Click"/>
+        <!--
+        <StackPanel HorizontalAlignment="Left" Margin="15,10,0,10" Grid.Column="2" Grid.Row="0">
+            <ComboBox x:Name="ComboBox1" Width="136" SelectionChanged="Button_Click" 
+                      Style="{StaticResource comboBoxStyle2}" Template="{DynamicResource ComboBoxStyle1}"/>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Left" Margin="156,10,0,10" Grid.Column="2" Grid.Row="0">
+            <ComboBox x:Name="ComboBox2" Width="136" ItemsSource="{Binding Collection}" SelectionChanged="Button_Click_1" 
+                      Style="{StaticResource comboBoxStyle2}" Template="{DynamicResource ComboBoxStyle1}" />
+        </StackPanel>
+        -->
+
+        <Button x:Name="BackImport" Content="Import" HorizontalAlignment="Left" Height="30" Margin="7.2,10,0,0" VerticalAlignment="Top" 
+                Width="88" Click="BackImport_Click" Style="{StaticResource buttonStyle}" Grid.Column="1"/>
+
+        <!--Button for toggling datagrid views-->
+
+        <Button x:Name="TogglePipelineButton" Content="Toggle Pathway View" VerticalAlignment="Top" Margin="0,10,485,0" Height="30"
+            Style="{StaticResource buttonStyle}" HorizontalAlignment="Right" Width="168" Click="Toggle_Pipeline_Click" Grid.Column="2" ToolTip="View current dataset within selected Pathway"/>
+        <Button x:Name="ToggleFullButton" Content="Toggle Full View" Grid.Column="2" VerticalAlignment="Top" Margin="0,10,340,0" Height="30"
+            Style="{StaticResource buttonStyle}" HorizontalAlignment="Right" Width="140" Click="Toggle_Full_Click" ToolTip="View current dataset in original format"/>
+        <Button x:Name="RefreshButton" Content="Refresh View" Grid.Column="2" VerticalAlignment="Top" Margin="0,10,195,0" Height="30"
+            Style="{StaticResource buttonStyle}" HorizontalAlignment="Right" Width="140" Click="Refresh_Click" ToolTip="View original dataset in original format"/>
+
+
+
+    </Grid>
+
+
+
+</Page>

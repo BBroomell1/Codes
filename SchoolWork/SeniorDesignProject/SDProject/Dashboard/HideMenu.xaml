@@ -1,0 +1,16 @@
+﻿<Window x:Class="Dashboard.HideMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Dashboard"
+        mc:Ignorable="d"
+        Title="HideMenu" Height="252" Width="639">
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="50,10,0,0" TextWrapping="Wrap" Text="Select the column(s) you want to hide" VerticalAlignment="Top" Height="25" Width="500" TextAlignment="Center" FontSize="18"/>
+
+        <ListBox x:Name="HeaderList" HorizontalAlignment="Left" Height="105" Margin="50,55,0,0" VerticalAlignment="Top" Width="500"/>
+        <Button x:Name="GoButton" Content="Go" HorizontalAlignment="Left" Margin="559,170,0,25" Width="51" Click="GoButton_Click"/>
+
+    </Grid>
+</Window>
