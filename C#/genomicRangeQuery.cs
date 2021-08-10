@@ -46,10 +46,21 @@ using System;
 // you can write to stdout for debugging purposes, e.g.
 // Console.WriteLine("this is a debug message");
 
+using System;
+// you can also use other imports, for example:
+// using System.Collections.Generic;
+
+// you can write to stdout for debugging purposes, e.g.
+// Console.WriteLine("this is a debug message");
+
 class Solution {
     public int[] solution(string S, int[] P, int[] Q) {
         int lenP = P.Length;
         int lenQ = Q.Length;
+        int lenS = S.Length;
+        int[] res = new int[lenP];
+        int[,] prefSum = new int[3,lenS+1];
+        int i;
 
         // Check if P and Q are the same length. if not return null;
         if(lenP != lenQ)
@@ -57,52 +68,56 @@ class Solution {
             return null;
         }
 
-        // New array to return result.
-        // current to keep track of position for that iteration.
-        // i to keep track of which iteration.
-        int[] ans = new int[lenP];
-        int current = 0;
-        int i = 0;
 
-        // Loop through each iteration of pairs from P and Q.
-        // Set ans[i] to the highest which is 4.
-        // Set current to the beggining of sequence P[i].
+
+        // Use a 2d array to get prefix sums. 0 == A, 1 == C, 2 == G.
+        for(i = 0; i < lenS; i++)
+        {
+            if(S[i] == 'A')
+            {
+                prefSum[0,i+1] = prefSum[0,i] + 1;
+                prefSum[1,i+1] = prefSum[1,i];
+                prefSum[2,i+1] = prefSum[2,i];
+            }
+
+            if(S[i] == 'C')
+            {
+                prefSum[0,i+1] = prefSum[0,i];
+                prefSum[1,i+1] = prefSum[1,i] + 1;
+                prefSum[2,i+1] = prefSum[2,i];
+            }
+
+            if(S[i] == 'G')
+            {
+                prefSum[0,i+1] = prefSum[0,i];
+                prefSum[1,i+1] = prefSum[1,i];
+                prefSum[2,i+1] = prefSum[2,i] + 1;
+            }
+        }
+
+        //Iterate through S. Use the pref sums to calculate lowest impact factor
+        //and place result into res[].
+
         for(i = 0; i < lenP; i++)
         {
-            ans[i] = 4;
-            current = P[i];
-
-            // Check for each position from P[i] to Q[i] and set the lowest variable if higher
-            // than S[current] then increment current.
-            // Break out of loop and go to next iteration if 'A" is reached.
-            do{
-                if(S[current] == 'A')
-                {
-                    if(ans[i] > 1)
-                    {
-                        ans[i] = 1;
-                        current = Q[i];
-                        break;
-                    }
-                }
-                else if(S[current] == 'C')
-                {
-                    if(ans[i] > 2)
-                    {
-                        ans[i] = 2;
-                    }
-                }
-                else if(S[current] == 'G')
-                {
-                    if(ans[i] > 3)
-                    {
-                        ans[i] = 3;
-                    }
-                }
-                current++;
-            }while(current <= Q[i]);
-
+            if(prefSum[0,Q[i]+1] - prefSum[0,P[i]] > 0)
+            {
+                res[i] = 1;
+            }
+            else if(prefSum[1,Q[i]+1] - prefSum[1,P[i]] > 0)
+            {
+                res[i] = 2;
+            }
+            else if(prefSum[2,Q[i]+1] - prefSum[2,P[i]] > 0)
+            {
+                res[i] = 3;
+            }
+            else
+            {
+                res[i] = 4;
+            }
         }
-    return ans;
+
+        return res;
     }
 }
