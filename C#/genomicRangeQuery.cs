@@ -93,6 +93,13 @@ class Solution {
                 prefSum[1,i+1] = prefSum[1,i];
                 prefSum[2,i+1] = prefSum[2,i] + 1;
             }
+            if(S[i] == 'T')
+            {
+                prefSum[0,i+1] = prefSum[0,i];
+                prefSum[1,i+1] = prefSum[1,i];
+                prefSum[2,i+1] = prefSum[2,i];
+            }
+
         }
 
         //Iterate through S. Use the pref sums to calculate lowest impact factor
