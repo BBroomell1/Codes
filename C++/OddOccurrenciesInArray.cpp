@@ -28,44 +28,39 @@ Write an efficient algorithm for the following assumptions:
 N is an odd integer within the range [1..1,000,000];
 each element of array A is an integer within the range [1..1,000,000,000];
 all but one of the values in A occur an even number of times.*/
+#include <cstddef>
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
-int solution(vector<int> &A);
 
-int main(){
-  
-}
 
 int solution(vector<int> &A) {
-      int maxNum = 0;
-      int sizeA = A.size();
-      int i, tempNum;
-      for(i = 0; i < sizeA; i++)
-      {
-          if(A[i] > maxNum)
-          {
-              maxNum = A[i];
-          }
-      }
-      maxNum += 1;
-      cout << maxNum << endl;
-      int array[maxNum];
-      for(i = 1; i < maxNum; i++)
-      {
-          array[i] = 0;
-      }
-      for(i = 0; i < sizeA; i++)
-      {
-          tempNum = A[i];
-          array[tempNum]++;
-      }
-      for(i = 1; i < maxNum; i++)
-      {
-          if(array[i] % 2 != 0)
-          {
-              cout << i << endl;
-              return i;
-          }
-      }
-  }
+
+    int len = A.size();
+    //Check if empty
+    if(len == 0 || A.empty() == true)
+    {
+        return 0;
+    }
+    //Check if even sized array
+    if(len % 2 == 0)
+    {
+        return 0;
+    }
+
+    //Sort array
+    sort(A.begin(), A.end());
+
+    int i= 0;
+    //Iterate through array and check for pairs. If number has no pair return that number.
+    do{
+        if(A[i] != A[i+1])
+        {
+            return A[i];
+        }
+
+    i+= 2;
+    }while(i < len);
+
+}
